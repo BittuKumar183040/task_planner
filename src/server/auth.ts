@@ -15,6 +15,9 @@ declare module "next-auth" {
       id: string;
     };
   }
+  interface User {
+    id: string;
+  }
 }
 
 export const authOptions: NextAuthOptions = {
@@ -35,6 +38,7 @@ export const authOptions: NextAuthOptions = {
       user: {
         ...session.user,
         id: token.id as string,
+        username: token.username as string,
       },
     }),
   },
@@ -50,9 +54,13 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Email and password are required");
         }
 
-        // Look up user in your Supabase DB via Prisma
-        const user = await db.user.findUnique({
-          where: { email: credentials.email },
+        const user = await db.user.findFirst({
+          where: {
+            OR: [
+              { email: credentials.email },
+              { username: credentials.email },
+            ],
+          },
         });
 
         if (!user) {
@@ -72,6 +80,7 @@ export const authOptions: NextAuthOptions = {
 
         return {
           id: user.id,
+          username: user.username,
           email: user.email,
           name: user.name,
         };

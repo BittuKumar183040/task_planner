@@ -14,22 +14,9 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-enum TaskStatus {
-  TODO
-  IN_PROGRESS
-  REVIEW
-  COMPLETED
-}
-
-enum TaskPriority {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
 model User {
   id            String    @id @default(cuid())
+  username      String    @unique
   name          String?
   email         String?   @unique
   emailVerified DateTime?
@@ -37,7 +24,7 @@ model User {
   password      String?
   accounts       Account[]
   sessions       Session[]
-
+  team           String[]
   tasksAssigned  Task[] @relation("AssignedTasks")
   tasksCreated   Task[] @relation("CreatedTasks")
 
@@ -47,11 +34,11 @@ model User {
 
 model Task {
   id          String       @id @default(cuid())
-
-  title       String
+  taskId      Int          @unique @default(autoincrement())
+  title       String?
   description String?
-  status      TaskStatus   @default(TODO)
-  priority    TaskPriority @default(MEDIUM)
+  status      String?
+  priority    String?
   deadline    DateTime?
   tags        String[]
   assignedToId String?
@@ -61,7 +48,7 @@ model Task {
   createdBy User @relation( "CreatedTasks", fields: [createdById], references: [id] )
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime? @updatedAt
 
   @@index([title])
   @@index([status])
