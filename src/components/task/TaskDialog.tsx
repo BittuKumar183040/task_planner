@@ -1,28 +1,34 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { X } from "lucide-react";
 import { useState } from "react";
-import { api } from "~/utils/api";
+import { api, type RouterOutputs } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import Dialog from "../layout/Dialog";
 
 type Props = {
+  task?: RouterOutputs["task"]["getTasks"][number];
   open: boolean;
   onClose: () => void;
 };
 
-const CreateTaskDialog = ({ open, onClose }: Props) => {
+const CreateTaskDialog = ({ task, open, onClose }: Props) => {
 
   const { data: sessionData } = useSession();
-
   const utils = api.useUtils();
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [assignedToId, setAssignedToId] = useState<string | null>(sessionData?.user?.id ?? null);
-  const [status, setStatus] = useState<"new" | "active" | "completed">("new");
-  const [deadline, setDeadline] = useState<Date | null>(null);
-  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
-  const [tagInput, setTagInput] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
+  const [title, setTitle] = useState(task?.title ?? "");
+  const [description, setDescription] = useState(task?.description ?? "");
+  const [assignedTo, setAssignedTo] = useState<{ id: string; username: string }>({
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    id: task?.assignedTo?.id ?? sessionData?.user?.id ?? "",
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    username: task?.assignedTo?.username ?? sessionData?.user?.username ?? "",
+  });
+  const [status, setStatus] = useState<"new" | "active" | "completed">((task?.status ?? "new") as "new" | "active" | "completed");
+  const [date, setDate] = useState(task?.assignedTo ? task.deadline ? task.deadline.toISOString().split("T")[0] : "" : "");
+  const [priority, setPriority] = useState<"low" | "medium" | "high">((task?.priority ?? "medium") as "low" | "medium" | "high");
+  const [tags, setTags] = useState<string[]>(task?.tags ?? []);
+  const [tagInput, setTagInput] = useState<string>("");
 
   const createTask = api.task.createTask.useMutation({
     onSuccess: async () => {
@@ -31,10 +37,27 @@ const CreateTaskDialog = ({ open, onClose }: Props) => {
       setDescription("");
       setPriority("medium");
       setStatus("new");
-      setDeadline(null);
-      setAssignedToId(sessionData?.user?.id ?? null);
+      setDate("");
+      setAssignedTo(sessionData?.user ?? { id: sessionData?.user?.id ?? "", username: sessionData?.user?.username ?? "" });
       setTags([]);
       onClose();
+    },
+  });
+
+  const getUserByUsername = api.user.getUserByUsername.useQuery(
+    { username: assignedTo.username },
+    {
+      enabled: false,
+    }
+  );
+
+  const updateTask = api.task.updateTask.useMutation({
+    onSuccess: async () => {
+      await utils.task.invalidate();
+      onClose();
+    },
+    onError: (error) => {
+      console.error("Failed to update task:", error);
     },
   });
 
@@ -61,50 +84,81 @@ const CreateTaskDialog = ({ open, onClose }: Props) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await createTask.mutateAsync({
-      title,
-      description,
-      priority,
-      status,
-      assignedToId: assignedToId ?? undefined,
-      deadline: deadline ?? undefined,
-      tags,
-    });
+    if (task) {
+      await updateTask.mutateAsync({
+        id: task.id,
+        title,
+        description,
+        priority,
+        status,
+        assignedToId: assignedTo.id,
+        deadline: date ? new Date(date) : undefined,
+        tags,
+      });
+    } else {
+      await createTask.mutateAsync({
+        title,
+        description,
+        priority,
+        status,
+        assignedToId: assignedTo.id ?? sessionData?.user?.id,
+        deadline: date ? new Date(date) : undefined,
+        tags,
+      });
+    }
   };
 
   if (!open) return null;
 
+  const handleChangeAssignedTo = async (username: string) => {
+    setAssignedTo({ id: "", username });
+    if (!username) return;
+    const { data } = await getUserByUsername.refetch();
+    console.log("Fetched user data:", data);
+    if (data) {
+      setAssignedTo({ id: data.id, username: data.username });
+    }
+  };
+
   return (
-    <Dialog title="Create Task" onClose={onClose}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <Dialog title={task ?
+      <p>Edit Task
+        <span className="font-normal ml-2 bg-gray-100 px-2 py-1 rounded shadow-inner">
+          #{task.taskId}
+        </span>
+      </p>
+      : "Create Task"}
+      onClose={onClose}
+    >
+      <form onSubmit={handleSubmit} className="space-y-4 text-xs">
         <div>
-          <label className="mb-1 block text-sm font-medium">Title <span className="text-red-500">*</span></label>
+          <label className="mb-1 block font-medium">Title <span className="text-red-500">*</span></label>
           <input
             type="text"
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded border px-3 py-2 outline-none focus:border-blue-500"
+            className="w-full rounded border p-2 outline-none focus:border-gray-500"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Description</label>
+          <label className="mb-1 block font-medium">Description</label>
           <textarea
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded border px-3 py-2 outline-none focus:border-blue-500"
+            className="w-full rounded border p-2 outline-none focus:border-gray-500"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1 block text-sm font-medium">Priority</label>
+            <label className="mb-1 block font-medium">Priority</label>
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value as "low" | "medium" | "high")}
-              className="w-full rounded border px-3 py-2"
+              className="w-full rounded border p-2"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -112,53 +166,53 @@ const CreateTaskDialog = ({ open, onClose }: Props) => {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Status</label>
+            <label className="mb-1 block font-medium">Status</label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as "new" | "active" | "completed")}
-              className="w-full rounded border px-3 py-2"
+              className="w-full rounded border p-2"
             >
-              <option value="new">New</option>
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
+              <option value="new">📰&nbsp;&nbsp;&nbsp;New</option>
+              <option value="active">🕐&nbsp;&nbsp;&nbsp;Active</option>
+              <option value="completed">✅&nbsp;&nbsp;&nbsp;Completed</option>
             </select>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1 block text-sm font-medium">Assigned to</label>
+            <label className="mb-1 block font-medium">Assigned to</label>
             <input
               type="text"
-              value={assignedToId ?? ""}
-              onChange={(e) => setAssignedToId(e.target.value || null)}
+              value={assignedTo.username}
+              onChange={(e) => handleChangeAssignedTo(e.target.value)}
               placeholder="User ID"
-              className="w-full rounded border px-3 py-2 outline-none focus:border-blue-500"
+              className="w-full rounded border p-2 outline-none focus:border-gray-500"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Deadline</label>
-            <input
-              type="date"
-              value={deadline ? deadline.toISOString().split("T")[0] : ""}
-              onChange={(e) =>
-                setDeadline(e.target.value ? new Date(e.target.value) : null)
-              }
-              className="w-full rounded border px-3 py-2 outline-none focus:border-blue-500"
-            />
+            <label className="mb-1 block font-medium">Deadline</label>
+            <div className="flex gap-2">
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full rounded border p-2 outline-none focus:border-gray-500"
+              />
+            </div>
           </div>
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Tags</label>
+          <label className="mb-1 block font-medium">Tags</label>
           <div
-            className="flex min-h-[42px] flex-wrap items-center gap-1.5 rounded border px-2 py-1.5 focus-within:border-blue-500 cursor-text"
+            className="flex min-h-[42px] flex-wrap items-center gap-1.5 rounded border px-2 py-1.5 focus-within:border-gray-500 cursor-text"
             onClick={() => document.getElementById("tag-input")?.focus()}
           >
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600"
+                className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-gray-600"
               >
                 {tag}
                 <button
@@ -178,22 +232,22 @@ const CreateTaskDialog = ({ open, onClose }: Props) => {
               onKeyDown={handleTagKeyDown}
               onBlur={() => tagInput && addTag(tagInput)}
               placeholder={tags.length === 0 ? "Add tags…" : ""}
-              className="min-w-[80px] flex-1 border-none bg-transparent text-sm outline-none"
+              className="min-w-[80px] flex-1 border-none bg-transparent outline-none"
             />
           </div>
-          <p className="mt-1 text-xs text-gray-400">Press Enter or comma to add a tag</p>
+          <p className="mt-1 text-gray-400">Press Enter or comma to add a tag</p>
         </div>
 
         <div className="flex justify-end gap-2 pt-1">
-          <button type="button" onClick={onClose} className="rounded border px-4 py-2 text-sm">
+          <button type="button" onClick={onClose} className="rounded border px-4 py-2">
             Cancel
           </button>
           <button
             type="submit"
             disabled={createTask.isPending}
-            className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700 disabled:opacity-50"
           >
-            {createTask.isPending ? "Creating…" : "Create Task"}
+            {task ? "Update Changes" : createTask.isPending ? "Creating…" : "Create Task"}
           </button>
         </div>
       </form>

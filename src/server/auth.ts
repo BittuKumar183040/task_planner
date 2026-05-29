@@ -11,8 +11,17 @@ import bcrypt from "bcryptjs";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
+    pages: {
+      signIn: "/signin";
+      signUp: "/signup";
+      signOut: "/auth/signout";
+      error: "/auth/error";
+    }
     user: DefaultSession["user"] & {
       id: string;
+      username: string;
+      emailVerified: boolean | null;
+      image: string | null;
     };
   }
   interface User {
@@ -29,18 +38,26 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.email = user.email;
-        token.name = user.name;
       }
       return token;
     },
-    session: ({ session, token }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: token.id as string,
-        username: token.username as string,
-      },
-    }),
+    session: async ({ session, token }) => {
+      const dbUser = await db.user.findUnique({
+        where: { id: token.id as string },
+        select: { name: true, image: true, username: true, emailVerified: true },
+      });
+
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id as string,
+          username: dbUser?.username ?? null,
+          emailVerified: dbUser?.emailVerified ?? null,
+          image: dbUser?.image ?? null,
+        },
+      };
+    },
   },
   adapter: PrismaAdapter(db),
   providers: [
@@ -71,7 +88,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("User has no password set (maybe OAuth account?)");
         }
 
-        // // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         // const isValid = await bcrypt.compare(credentials.password, user.password);
 
         // if (!isValid) {
@@ -80,9 +97,10 @@ export const authOptions: NextAuthOptions = {
 
         return {
           id: user.id,
-          username: user.username,
           email: user.email,
           name: user.name,
+          image: user.image,
+          username: user.username,
         };
       },
     }),

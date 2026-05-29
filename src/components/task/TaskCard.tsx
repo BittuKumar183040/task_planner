@@ -1,91 +1,70 @@
-import React from 'react'
+import { Notebook } from 'lucide-react';
+import React, { useState } from 'react'
+import type { RouterOutputs } from '~/utils/api'
+import CreateTaskDialog from './TaskDialog';
 
-interface Task {
-  id: string;
-  description: string | null;
-  title: string | null;
-  status: string | null;
-  assignedToId: string | null;
-  priority: string | null;
-  deadline: Date | null;
-  tags: string[];
-}
+type Task = RouterOutputs["task"]["getTasks"][number];
 
-const priorityStyles: Record<string, { bg: string; text: string; label: string }> = {
-  high:   { bg: 'bg-red-100',    text: 'text-red-700',    label: 'High' },
-  medium: { bg: 'bg-amber-100',  text: 'text-amber-700',  label: 'Medium' },
-  low:    { bg: 'bg-green-100',  text: 'text-green-700',  label: 'Low' },
-}
+
+const priorityStyles = {
+  high: { border: "border-red-300", bg: "bg-red-50", label: "High" },
+  medium: { border: "border-gray-500", bg: "bg-gray-100", label: "Medium" },
+  low: { border: "border-gray-300", bg: "bg-gray-50", label: "Low" },
+};
 
 const statusStyles: Record<string, { bg: string; text: string }> = {
-  'in progress': { bg: 'bg-teal-100',  text: 'text-teal-700' },
-  'done':        { bg: 'bg-green-100', text: 'text-green-700' },
-  'todo':        { bg: 'bg-gray-100',  text: 'text-gray-600' },
+  'completed': { bg: 'bg-teal-100', text: 'text-teal-700' },
+  'active': { bg: 'bg-green-100', text: 'text-green-700' },
+  'new': { bg: 'bg-gray-100', text: 'text-gray-600' },
 }
 
-const getInitials = (id: string) => id.slice(0, 2).toUpperCase()
-
 const TaskCard = ({ task }: { task: Task }) => {
-  const priority = priorityStyles[task.priority?.toLowerCase() ?? '']
-  const status   = statusStyles[task.status?.toLowerCase() ?? '']
+  const status = statusStyles[task.status ?? '']
+  const [open, setOpen] = useState(false);
+  const priority =
+    priorityStyles[task.priority as keyof typeof priorityStyles] ??
+    priorityStyles.low;
 
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-3 max-w-sm shadow-sm">
+  return (<>
+    <div
+      className={` ${priority.bg} ${priority.border} lg:w-44 w-full select-none rounded-md border border-l-4 p-3 shadow-sm`}
+      onClick={() => setOpen(true)}
+    >
+      <div className="flex items-center gap-2">
+        <Notebook size={15} className="text-gray-400 shrink-0" />
+        <p className="w-full truncate text-xs font-medium text-gray-900">
+          {task.title}
+        </p>
+      </div>
 
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          {priority && (
-            <span className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full ${priority.bg} ${priority.text}`}>
-              {priority.label}
-            </span>
-          )}
-          <span className="text-xs text-gray-400 font-mono">#{task.id}</span>
+      <div className="border-t border-gray-100 flex flex-col gap-1.5">
+
+        <div className="flex items-center text-xs gap-2 py-2">
+          <div className="h-5 w-5 bg-gray-400 rounded-full shrink-0"></div>
+          {task.assignedTo && 'username' in task.assignedTo ? (
+            <span className="text-gray-700 truncate">{(task.assignedTo as { username: string }).username}</span>
+          ) : null}
         </div>
-        {status && (
-          <span className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full ${status.bg} ${status.text}`}>
-            {task.status}
+
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-400">Deadline</span>
+          <span className="text-gray-600 font-medium">
+            {task.deadline?.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </span>
-        )}
-      </div>
-
-      <div>
-        {task.title && <p className="text-sm font-medium text-gray-900 mb-1">{task.title}</p>}
-        {task.description && <p className="text-xs text-gray-500 leading-relaxed">{task.description}</p>}
-      </div>
-
-      <div className="border-t border-gray-100 pt-2.5 flex flex-col gap-1.5">
-        {task.assignedToId && (
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-400">Assignee</span>
-            <div className="flex items-center gap-1.5">
-              <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-medium text-blue-700">
-                {getInitials(task.assignedToId)}
-              </div>
-              <span className="text-gray-700">{task.assignedToId}</span>
-            </div>
-          </div>
-        )}
-        {task.deadline && (
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-400">Deadline</span>
-            <span className="text-red-600 font-medium">
-              {task.deadline.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {task.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {task.tags.map(tag => (
-            <span key={tag} className="text-[11px] px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500 border border-gray-200">
-              {tag}
-            </span>
-          ))}
         </div>
-      )}
 
+      </div>
+
+      <div className="flex h-5 flex-wrap gap-1 overflow-hidden">
+        {task.tags.map(tag => (
+          <span key={tag} className="text-xs px-2.5 rounded-full bg-gray-100 text-gray-500 border border-gray-200">
+            {tag}
+          </span>
+        ))}
+      </div>
     </div>
+    <CreateTaskDialog task={task} open={open} onClose={() => setOpen(false)} />
+  </>
   )
 }
 

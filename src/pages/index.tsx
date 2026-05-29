@@ -1,9 +1,10 @@
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import type { Session } from "next-auth";
 import Head from "next/head";
 
 import { api } from "~/utils/api";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function Home() {
   const { data: sessionData } = useSession();
@@ -29,9 +30,9 @@ export default function Home() {
             <p className="text-2xl text-white">
               {user ? `Welcome, ${user.name}!` : ""}
             </p>
-            {user  && (
-              <Link href="/tasks" className="text-lg text-blue-400 hover:underline">
-                Go to Tasks
+            {user && (
+              <Link href="/boards" className="text-lg text-blue-400 hover:underline">
+                Go to Boards
               </Link>
             )}
             <AuthShowcase sessionData={sessionData} />
@@ -47,11 +48,12 @@ type AuthShowcaseProps = {
 };
 
 const AuthShowcase = ({ sessionData }: AuthShowcaseProps) => {
+  const router = useRouter();
   return (
     <div className="flex flex-col items-center justify-center gap-4">
       <button
         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white transition hover:bg-white/20"
-        onClick={() => sessionData ? void signOut() : void signIn()}
+        onClick={() => sessionData ? void signOut() : void router.push("/signin")}
       >
         {sessionData ? "Sign out" : "Sign in"}
       </button>
