@@ -6,7 +6,7 @@ import TaskHeader from "~/components/task/TaskHeader";
 import { getCurrentTeamId } from "~/helper/localstorageHelper";
 import { api } from "~/utils/api";
 
-const Boards = () => {
+const TeamsBoards = () => {
   const { data: sessionData } = useSession();
 
   const [teamId, setTeamId] = useState("");
@@ -15,23 +15,13 @@ const Boards = () => {
     setTeamId(getCurrentTeamId());
   }, []);
 
-  const { data: tasks } = api.task.getTasks.useQuery(
-    { teamId },
-    {
-      enabled: !!teamId,
-    },
-  );
+  const { data: tasks } = api.task.getTeamTasks.useQuery( { teamId }, { enabled: !!teamId });
 
-  return (
-    <AppLayout>
-      <TaskHeader />
-      <TaskBoard
-        title={sessionData?.user?.name ?? "Default"}
-        tasks={tasks}
-      />
-    </AppLayout>
-  );
+  return <AppLayout>
+    <TaskHeader />
+    <TaskBoard title={sessionData?.user?.name ?? "Default"} tasks={tasks} />
+  </AppLayout>;
 };
 
 
-export default Boards;
+export default TeamsBoards;

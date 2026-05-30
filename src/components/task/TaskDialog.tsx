@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api, type RouterOutputs } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import Dialog from "../layout/Dialog";
+import { getCurrentTeamId } from "~/helper/localstorageHelper";
 
 type Props = {
   task?: RouterOutputs["task"]["getTasks"][number];
@@ -17,6 +18,7 @@ const CreateTaskDialog = ({ task, open, onClose }: Props) => {
   const utils = api.useUtils();
 
   const [title, setTitle] = useState(task?.title ?? "");
+  const [teamId, setTeamId] = useState<string>("");
   const [description, setDescription] = useState(task?.description ?? "");
   const [assignedTo, setAssignedTo] = useState<{ id: string; username: string }>({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -30,10 +32,15 @@ const CreateTaskDialog = ({ task, open, onClose }: Props) => {
   const [tags, setTags] = useState<string[]>(task?.tags ?? []);
   const [tagInput, setTagInput] = useState<string>("");
 
+  useEffect(() => {
+    setTeamId(getCurrentTeamId());
+  }, []);
+
   const createTask = api.task.createTask.useMutation({
     onSuccess: async () => {
       await utils.task.getTasks.invalidate();
       setTitle("");
+      setTeamId("");
       setDescription("");
       setPriority("medium");
       setStatus("new");
@@ -98,6 +105,7 @@ const CreateTaskDialog = ({ task, open, onClose }: Props) => {
     } else {
       await createTask.mutateAsync({
         title,
+        teamId,
         description,
         priority,
         status,

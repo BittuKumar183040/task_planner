@@ -53,6 +53,16 @@ export const userRouter = createTRPCRouter({
       await ctx.db.user.delete({ where: { id: userId } });
       return { message: "User deleted successfully" };
   }),
+  forgotPassword: publicProcedure
+    .input(z.object({ email: z.string().email() }))
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({ where: { email: input.email } });
+      if (!user) {
+        throw new Error("User with this email does not exist");
+      }
+      // Here you would generate a password reset token and send an email to the user
+      return { message: "Password reset instructions sent to email" };
+    }),
   updateImage: protectedProcedure
     .input(z.object({ image: z.string() }))
     .mutation(async ({ ctx, input }) => {

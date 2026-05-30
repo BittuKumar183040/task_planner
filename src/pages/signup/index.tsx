@@ -26,14 +26,14 @@ const SignupPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="flex w-full h-dvh rounded-xl overflow-hidden shadow-sm border border-gray-200">
+      <div className="flex flex-col w-full h-dvh rounded-xl overflow-hidden shadow-sm border border-gray-200">
 
         <div className="w-fit flex-shrink-0 bg-[#1a1a2e] flex flex-col justify-end p-8">
           <p className="font-serif text-2xl whitespace-nowrap text-white leading-tight mb-1">Create account.</p>
           <p className="text-xs text-white/40">Join us today</p>
         </div>
 
-        <div className="flex-1 bg-white p-10 flex flex-col justify-center">
+        <div className="flex-1 bg-white md:p-10 p-2 flex flex-col justify-center items-center">
           <p className="text-[11px] font-medium tracking-widest text-gray-400 uppercase mb-4">New account</p>
           <h1 className="text-2xl font-serif text-gray-900 mb-7">Sign up</h1>
 
@@ -43,7 +43,7 @@ const SignupPage = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="md:w-96 w-full space-y-4 ">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1.5">Name</label>

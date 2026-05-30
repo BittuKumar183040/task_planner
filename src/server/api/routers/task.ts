@@ -12,6 +12,7 @@ export const taskRouter = createTRPCRouter({
         title: z.string(),
         description: z.string().optional(),
         assignedToId: z.string().optional(),
+        teamId: z.string(),
         priority: z.enum(["low", "medium", "high"]).default("medium"),
         status: z.enum(["new", "active", "completed"]).default("new"),
         deadline: z.date().optional(),
@@ -78,27 +79,46 @@ export const taskRouter = createTRPCRouter({
       }
       return task;
     }),
-  getTasks: protectedProcedure.query(({ ctx }) => {
-    const userId = ctx.session.user.id;
-    return ctx.db.task.findMany({
-      where: {
-        OR: [
-          { createdById: userId },
-          { assignedToId: userId },
-        ],
-      },
-      include: {
-        assignedToId: false,
-        createdById: false,
-        assignedTo: {
-          select: { id: true, username: true },
+  getTasks: protectedProcedure
+    .input(z.object({ teamId: z.string() }))
+    .query(({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      return ctx.db.task.findMany({
+        where: {
+          teamId: input.teamId,
+          assignedToId: userId,
         },
-        createdBy: {
-          select: { id: true, username: true },
+        include: {
+          assignedToId: false,
+          createdById: false,
+          assignedTo: {
+            select: { id: true, username: true },
+          },
+          createdBy: {
+            select: { id: true, username: true },
+          },
         },
-      },
-    });
-  }),
+      });
+    }),
+  getTeamTasks: protectedProcedure
+    .input(z.object({ teamId: z.string() }))
+    .query(({ ctx, input }) => {
+      return ctx.db.task.findMany({
+        where: {
+          teamId: input.teamId
+        },
+        include: {
+          assignedToId: false,
+          createdById: false,
+          assignedTo: {
+            select: { id: true, username: true },
+          },
+          createdBy: {
+            select: { id: true, username: true },
+          },
+        },
+      });
+    }),
   deleteTask: protectedProcedure
     .input(z.object({ taskId: z.string() }))
     .mutation(async ({ ctx, input }) => {

@@ -24,7 +24,7 @@ model User {
   password      String?
   accounts       Account[]
   sessions       Session[]
-  team           String[]
+  teamMembers    TeamMember[]
   tasksAssigned  Task[] @relation("AssignedTasks")
   tasksCreated   Task[] @relation("CreatedTasks")
 
@@ -43,16 +43,44 @@ model Task {
   tags        String[]
   assignedToId String?
   createdById  String
+  teamId       String?  
 
   assignedTo User? @relation( "AssignedTasks", fields: [assignedToId], references: [id] )
-  createdBy User @relation( "CreatedTasks", fields: [createdById], references: [id] )
-
+  createdBy User  @relation( "CreatedTasks", fields: [createdById], references: [id] )
+  team      Team? @relation(fields: [teamId], references: [id])
+  
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
 
   @@index([title])
   @@index([status])
   @@index([priority])
+  @@index([teamId])
+}
+
+model Team {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  description String?
+  members     TeamMember[]
+  tasks       Task[]
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model TeamMember {
+  id         String   @id @default(cuid())
+  teamId     String
+  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
 }
 
 model Account {

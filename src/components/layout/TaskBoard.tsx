@@ -1,8 +1,12 @@
-import { useSession } from 'next-auth/react';
 import React from 'react'
-import { api } from '~/utils/api';
-import TaskHeader from '../task/TaskHeader';
 import TaskCard from '../task/TaskCard';
+import { type RouterOutputs } from '~/utils/api';
+
+type TaskBoardProps = {
+  title: string;
+  postTitle?: React.ReactNode;
+  tasks?: RouterOutputs["task"]["getTasks"];
+}
 
 const TableHeader = ({ title, count }: { title: string, count: number }) => (
   <div className="flex items-center justify-between border-b p-2">
@@ -11,23 +15,17 @@ const TableHeader = ({ title, count }: { title: string, count: number }) => (
   </div>
 )
 
-const TaskBoard = () => {
-  const { data: sessionData } = useSession();
-  const { data: tasks } = api.task.getTasks.useQuery(undefined, {
-    enabled: !!sessionData?.user,
-  });
-
+const TaskBoard = ({ title, postTitle=<span>&apos;s Board</span>, tasks }: TaskBoardProps) => {
   const newTasks = tasks?.filter((task) => task.status === "new") ?? [];
   const activeTasks = tasks?.filter((task) => task.status === "active") ?? [];
   const completedTasks = tasks?.filter((task) => task.status === "completed") ?? [];
 
   return (
     <>
-      <TaskHeader />
       <div className="flex justify-between items-center mb-2">
         <p className="text-lg font-bold">
-          <span className="capitalize">{sessionData?.user?.name}</span>
-          <span>&apos;s Board</span>
+          <span className="capitalize">{title}</span>
+          {postTitle}
         </p>
       </div>
       <section className="flex-1 overflow-auto">

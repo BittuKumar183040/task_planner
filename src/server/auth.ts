@@ -14,7 +14,6 @@ declare module "next-auth" {
     pages: {
       signIn: "/signin";
       signUp: "/signup";
-      signOut: "/auth/signout";
       error: "/auth/error";
     }
     user: DefaultSession["user"] & {
