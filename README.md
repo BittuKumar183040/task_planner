@@ -207,59 +207,7 @@ src/
 
 # Database Design
 
-## User
 
-| Field     | Type     |
-| --------- | -------- |
-| id        | String   |
-| username  | String   |
-| email     | String   |
-| password  | String   |
-| image     | String   |
-| createdAt | DateTime |
-
----
-
-## Team
-
-| Field       | Type   |
-| ----------- | ------ |
-| id          | String |
-| name        | String |
-| description | String |
-
----
-
-## TeamMember
-
-Composite Primary Key:
-
-(teamId, userId)
-
-| Field  | Type   |
-| ------ | ------ |
-| teamId | String |
-| userId | String |
-| role   | String |
-
----
-
-## Task
-
-| Field        | Type     |
-| ------------ | -------- |
-| id           | String   |
-| taskId       | Int      |
-| title        | String   |
-| description  | String   |
-| status       | String   |
-| priority     | String   |
-| deadline     | DateTime |
-| assignedToId | String   |
-| createdById  | String   |
-| teamId       | String   |
-
----
 
 # API Architecture
 
@@ -306,8 +254,6 @@ JWT Token
 Session
 ```
 
----
-
 # Security
 
 ## Password Security
@@ -341,18 +287,6 @@ Implemented using:
 * Team Router
 * Task Router
 * Task Member Router
-
----
-
-## Integration Testing
-
-Validate:
-
-* Login Flow
-* Signup Flow
-* Task Creation
-* Task Assignment
-* Team Switching
 
 ---
 
@@ -396,15 +330,10 @@ Example:
 
 ```env
 DATABASE_URL=
-
 NEXTAUTH_URL=http://localhost:3000
-
 NEXTAUTH_SECRET=
-
 NODE_ENV=development
 ```
-
----
 
 ## Database Setup
 
@@ -423,15 +352,8 @@ npm run db:migrate
 
 ```bash
 npm run dev
-```
-
-Application:
-
-```
 http://localhost:3000
 ```
-
----
 
 # Build
 
@@ -439,27 +361,8 @@ Create production build:
 
 ```bash
 npm run build
-```
-
-Start production server:
-
-```bash
 npm start
 ```
-
----
-
-# Performance Optimizations
-
-Implemented:
-
-* tRPC Query Caching
-* Prisma Query Optimization
-* Dashboard Aggregation Queries
-* Composite Keys
-* Protected API Endpoints
-
----
 
 # Future Improvements
 * Email Verification
@@ -471,18 +374,4 @@ Implemented:
 ---
 
 # Author
-
 Bittu Kumar
-
-Full Stack Developer
-
-Stack:
-
-* React
-* Next.js
-* TypeScript
-* Prisma
-* PostgreSQL
-* Node.js
-* Three.js
-* WebGL
