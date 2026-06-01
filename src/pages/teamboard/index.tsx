@@ -1,4 +1,3 @@
-import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import AppLayout from "~/components/layout/AppLayout";
 import TaskBoard from "~/components/layout/TaskBoard";
@@ -7,8 +6,6 @@ import { getCurrentTeamId } from "~/helper/localstorageHelper";
 import { api } from "~/utils/api";
 
 const TeamsBoards = () => {
-  const { data: sessionData } = useSession();
-
   const [teamId, setTeamId] = useState("");
 
   useEffect(() => {
@@ -19,7 +16,7 @@ const TeamsBoards = () => {
 
   return <AppLayout>
     <TaskHeader />
-    <TaskBoard title={sessionData?.user?.name ?? "Default"} tasks={tasks} />
+    <TaskBoard title={"Team"} tasks={tasks} />
   </AppLayout>;
 };
 

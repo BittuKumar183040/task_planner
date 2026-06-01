@@ -7,10 +7,10 @@ const TaskHeader = () => {
 
   return (
     <>
-      <div className="mb-6 flex justify-between items-center w-full gap-4">
-        <div className="flex justify-between gap-3">
+      <div className="mb-6 flex justify-end items-center w-full gap-4">
+        {/* <div className="flex justify-between gap-3">
           <input type="text" placeholder="Search tasks..." className="rounded-md border p-2 text-xs outline-none focus:ring-1 focus:ring-gray-200" />                
-        </div>
+        </div> */}
 
         <button
           onClick={() => setOpen(true)}

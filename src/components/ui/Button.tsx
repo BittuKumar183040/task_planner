@@ -11,12 +11,12 @@ export const Button = ({ label, onClick }: { label: string; onClick: () => void 
   )
 }
 
-export const SubmitButton = ({ label, onClick, type}: { label: string; onClick?: () => void, type?: "submit" | "reset" | "button" | undefined; }) => {
+export const SubmitButton = ({ label, onClick, type, className}: { label: string; onClick?: () => void, type?: "submit" | "reset" | "button" | undefined; className?: string }) => {
   return (
     <button
       type={type ?? "button"}
       onClick={onClick}
-      className="rounded-full whitespace-nowrap bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-black/80"
+      className={`rounded-full h-10 whitespace-nowrap bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-black/80 ${className}`}
     >
       {label}
     </button>

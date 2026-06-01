@@ -1,6 +1,9 @@
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { SubmitButton } from "~/components/ui/Button";
+import Input from "~/components/ui/Input";
 
 const SignInPage = () => {
   const router = useRouter();
@@ -24,7 +27,7 @@ const SignInPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="flex flex-col w-full h-dvh rounded-xl overflow-hidden shadow-sm border border-gray-200">
 
-        <div className="w-fit flex-shrink-0 bg-[#1a1a2e] flex flex-col justify-end p-8">
+        <div className="w-fit flex-shrink-0 bg-gray-800 flex flex-col justify-end p-8">
           <p className="font-serif text-2xl whitespace-nowrap text-white leading-tight mb-1">Welcome back.</p>
           <p className="text-xs text-white/40">Sign in to continue</p>
         </div>
@@ -40,30 +43,13 @@ const SignInPage = () => {
           )}
 
           <form onSubmit={handleSubmit} className="flex md:w-96 w-full flex-col items-start justify-start space-y-4 ">
-            <div className="w-full">
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">Email</label>
-              <input
-                type="email" value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full h-10 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
-              />
-            </div>
-            <div className="w-full">
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">Password</label>
-              <input
-                type="password" value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full h-10 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
-              />
-              
-            </div>
-            <button type="submit" className="w-full h-10 bg-[#1a1a2e] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
-              Sign in →
-            </button>
+            <Input label="Email" value={email} onChange={setEmail} placeholder="you@example.com" />
+            <Input label="Password" type="password" value={password} onChange={setPassword} placeholder="*******" />
+            <SubmitButton type="submit" label="Sign In →" className=" w-full" />
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-400">
-            Don&apos;t have an account? <a href="/signup" className="text-violet-500 font-medium">Sign up</a>
+            Don&apos;t have an account? <Link href="/signup" className="text-gray-500 font-medium">Sign up</Link>
           </p>
         </div>
       </div>

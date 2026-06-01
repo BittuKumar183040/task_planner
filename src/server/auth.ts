@@ -11,11 +11,6 @@ import bcrypt from "bcryptjs";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    pages: {
-      signIn: "/signin";
-      signUp: "/signup";
-      error: "/auth/error";
-    }
     user: DefaultSession["user"] & {
       id: string;
       username: string;
@@ -29,6 +24,12 @@ declare module "next-auth" {
 }
 
 export const authOptions: NextAuthOptions = {
+  pages: {
+    signIn: "/signin",
+    signOut: "/signin",
+    newUser: "/signup",
+    error: "/signin",
+  },
   session: {
     strategy: "jwt",
   },
@@ -87,12 +88,12 @@ export const authOptions: NextAuthOptions = {
           throw new Error("User has no password set (maybe OAuth account?)");
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        // const isValid = await bcrypt.compare(credentials.password, user.password);
+        //eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        const isValid = await bcrypt.compare(credentials.password, user.password);
 
-        // if (!isValid) {
-        //   throw new Error("Invalid password");
-        // }
+        if (!isValid) {
+          throw new Error("Invalid password");
+        }
 
         return {
           id: user.id,

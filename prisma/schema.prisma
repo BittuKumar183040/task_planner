@@ -64,21 +64,21 @@ model Team {
   description String?
   members     TeamMember[]
   tasks       Task[]
-
+  teamCode    String?      @unique
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }
 
 model TeamMember {
-  id         String   @id @default(cuid())
   teamId     String
-  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
   userId     String
+  role       String   @default("member")
+  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt  DateTime @default(now())
 
-  @@unique([teamId, userId])
+  @@id([teamId, userId])
   @@index([teamId])
   @@index([userId])
 }

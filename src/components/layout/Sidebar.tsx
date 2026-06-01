@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import type { LucideIcon } from "lucide-react";
-import { ChevronLeft, ChevronRight, Home, Table, Settings, LayoutDashboard } from "lucide-react";
+import { ChevronLeft, ChevronRight, Home, Table, Settings, LayoutDashboard, Users } from "lucide-react";
 
 type MenuItem = {
   label: string;
@@ -14,6 +14,7 @@ const menuItems: MenuItem[] = [
   { label: "Project Overview", href: "/dashboard", icon: Home },
   { label: "Boards", href: "/boards", icon: Table },
   { label: "Team Boards", href: "/teamboard", icon: LayoutDashboard },
+  { label: "Team Member", href: "/team-member", icon: Users },
 ];
 
 const Sidebar = () => {

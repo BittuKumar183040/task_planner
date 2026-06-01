@@ -64,10 +64,10 @@ export const taskRouter = createTRPCRouter({
           assignedToId: false,
           createdById: false,
           assignedTo: {
-            select: { id: true, username: true },
+            select: { id: true, username: true, image: true },
           },
           createdBy: {
-            select: { id: true, username: true },
+            select: { id: true, username: true, image: true },
           },
         },
       });
@@ -92,10 +92,10 @@ export const taskRouter = createTRPCRouter({
           assignedToId: false,
           createdById: false,
           assignedTo: {
-            select: { id: true, username: true },
+            select: { id: true, username: true, image: true },
           },
           createdBy: {
-            select: { id: true, username: true },
+            select: { id: true, username: true, image: true },
           },
         },
       });
@@ -111,10 +111,10 @@ export const taskRouter = createTRPCRouter({
           assignedToId: false,
           createdById: false,
           assignedTo: {
-            select: { id: true, username: true },
+            select: { id: true, username: true, image: true },
           },
           createdBy: {
-            select: { id: true, username: true },
+            select: { id: true, username: true, image: true },
           },
         },
       });

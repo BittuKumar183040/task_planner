@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api, type RouterOutputs } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import Dialog from "../layout/Dialog";
 import { getCurrentTeamId } from "~/helper/localstorageHelper";
+import Input, { SelectInput, Textarea } from "../ui/Input";
+import Tags from "../ui/Tags";
+import { TeamInputSearch } from "../team/TeamInputSearch";
 
 type Props = {
   task?: RouterOutputs["task"]["getTasks"][number];
@@ -17,24 +19,33 @@ const CreateTaskDialog = ({ task, open, onClose }: Props) => {
   const { data: sessionData } = useSession();
   const utils = api.useUtils();
 
-  const [title, setTitle] = useState(task?.title ?? "");
   const [teamId, setTeamId] = useState<string>("");
-  const [description, setDescription] = useState(task?.description ?? "");
-  const [assignedTo, setAssignedTo] = useState<{ id: string; username: string }>({
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    id: task?.assignedTo?.id ?? sessionData?.user?.id ?? "",
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    username: task?.assignedTo?.username ?? sessionData?.user?.username ?? "",
-  });
-  const [status, setStatus] = useState<"new" | "active" | "completed">((task?.status ?? "new") as "new" | "active" | "completed");
-  const [date, setDate] = useState(task?.assignedTo ? task.deadline ? task.deadline.toISOString().split("T")[0] : "" : "");
-  const [priority, setPriority] = useState<"low" | "medium" | "high">((task?.priority ?? "medium") as "low" | "medium" | "high");
-  const [tags, setTags] = useState<string[]>(task?.tags ?? []);
-  const [tagInput, setTagInput] = useState<string>("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [assignedTo, setAssignedTo] = useState<{ id: string; username: string }>({ id: "", username: "" });
+  const [status, setStatus] = useState<"new" | "active" | "completed">("new");
+  const [date, setDate] = useState<string>("");
+  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
+  const [tags, setTags] = useState<string[]>([]);
 
   useEffect(() => {
     setTeamId(getCurrentTeamId());
   }, []);
+
+  useEffect(() => {
+    setTitle(task?.title ?? "");
+    setDescription(task?.description ?? "");
+    setStatus((task?.status ?? "new") as typeof status);
+    setPriority((task?.priority ?? "medium") as typeof priority);
+    setDate(task?.deadline ? new Date(task.deadline).toISOString().slice(0, 10) : "");
+    setTags(task?.tags ?? []);
+    setAssignedTo({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      id: task?.assignedTo?.id ?? sessionData?.user?.id ?? "",
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      username: task?.assignedTo?.username ?? sessionData?.user?.username ?? "",
+    });
+  }, [task, sessionData]);
 
   const createTask = api.task.createTask.useMutation({
     onSuccess: async () => {
@@ -68,27 +79,6 @@ const CreateTaskDialog = ({ task, open, onClose }: Props) => {
     },
   });
 
-  const addTag = (value: string) => {
-    const trimmed = value.trim().toLowerCase();
-    if (trimmed && !tags.includes(trimmed)) {
-      setTags((prev) => [...prev, trimmed]);
-    }
-    setTagInput("");
-  };
-
-  const removeTag = (tag: string) => {
-    setTags((prev) => prev.filter((t) => t !== tag));
-  };
-
-  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      addTag(tagInput);
-    } else if (e.key === "Backspace" && tagInput === "" && tags.length > 0) {
-      removeTag(tags[tags.length - 1]!);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (task) {
@@ -118,16 +108,6 @@ const CreateTaskDialog = ({ task, open, onClose }: Props) => {
 
   if (!open) return null;
 
-  const handleChangeAssignedTo = async (username: string) => {
-    setAssignedTo({ id: "", username });
-    if (!username) return;
-    const { data } = await getUserByUsername.refetch();
-    console.log("Fetched user data:", data);
-    if (data) {
-      setAssignedTo({ id: data.id, username: data.username });
-    }
-  };
-
   return (
     <Dialog title={task ?
       <p>Edit Task
@@ -139,112 +119,51 @@ const CreateTaskDialog = ({ task, open, onClose }: Props) => {
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-        <div>
-          <label className="mb-1 block font-medium">Title <span className="text-red-500">*</span></label>
-          <input
-            type="text"
-            required
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded border p-2 outline-none focus:border-gray-500"
-          />
-        </div>
+        <Input label="Title" value={title} required onChange={setTitle} placeholder="Enter Task Title" />
+        <Textarea label="Description" value={description} onChange={setDescription} />
 
-        <div>
-          <label className="mb-1 block font-medium">Description</label>
-          <textarea
-            rows={3}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded border p-2 outline-none focus:border-gray-500"
+        <div className="grid grid-cols-2 gap-3">
+          <SelectInput
+            label="Priority"
+            value={priority}
+            onChange={(val) => setPriority(val as typeof priority)}
+            options={[
+              { value: "low", label: "💧   Low" },
+              { value: "medium", label: "⚠️   Medium" },
+              { value: "high", label: "🚨   High" },
+            ]}
+          />
+          <SelectInput
+            label="Status"
+            value={status}
+            onChange={(val) => setStatus(val as typeof status)}
+            options={[
+              { value: "new", label: "📰   New" },
+              { value: "active", label: "🕐   Active" },
+              { value: "completed", label: "✅   Completed" },
+            ]}
           />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="mb-1 block font-medium">Priority</label>
-            <select
-              value={priority}
-              onChange={(e) => setPriority(e.target.value as "low" | "medium" | "high")}
-              className="w-full rounded border p-2"
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
-          </div>
-          <div>
-            <label className="mb-1 block font-medium">Status</label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as "new" | "active" | "completed")}
-              className="w-full rounded border p-2"
-            >
-              <option value="new">📰&nbsp;&nbsp;&nbsp;New</option>
-              <option value="active">🕐&nbsp;&nbsp;&nbsp;Active</option>
-              <option value="completed">✅&nbsp;&nbsp;&nbsp;Completed</option>
-            </select>
-          </div>
+          <TeamInputSearch
+            label="Assigned to"
+            value={assignedTo.username}
+            teamId={teamId}
+            onChange={(val) => setAssignedTo({ id: "", username: val })}
+            onSelect={(user) => setAssignedTo({ id: user.id, username: user.username })}
+            placeholder="Search member..."
+          />
+          <Input
+            label="Deadline"
+            value={date}
+            type="date"
+            onChange={setDate}
+            placeholder="Deadline"
+          />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="mb-1 block font-medium">Assigned to</label>
-            <input
-              type="text"
-              value={assignedTo.username}
-              onChange={(e) => handleChangeAssignedTo(e.target.value)}
-              placeholder="User ID"
-              className="w-full rounded border p-2 outline-none focus:border-gray-500"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block font-medium">Deadline</label>
-            <div className="flex gap-2">
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded border p-2 outline-none focus:border-gray-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label className="mb-1 block font-medium">Tags</label>
-          <div
-            className="flex min-h-[42px] flex-wrap items-center gap-1.5 rounded border px-2 py-1.5 focus-within:border-gray-500 cursor-text"
-            onClick={() => document.getElementById("tag-input")?.focus()}
-          >
-            {tags.map((tag) => (
-              <span
-                key={tag}
-                className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-gray-600"
-              >
-                {tag}
-                <button
-                  type="button"
-                  onClick={() => removeTag(tag)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X size={11} />
-                </button>
-              </span>
-            ))}
-            <input
-              id="tag-input"
-              type="text"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleTagKeyDown}
-              onBlur={() => tagInput && addTag(tagInput)}
-              placeholder={tags.length === 0 ? "Add tags…" : ""}
-              className="min-w-[80px] flex-1 border-none bg-transparent outline-none"
-            />
-          </div>
-          <p className="mt-1 text-gray-400">Press Enter or comma to add a tag</p>
-        </div>
+        <Tags tags={tags} onChange={setTags} />
 
         <div className="flex justify-end gap-2 pt-1">
           <button type="button" onClick={onClose} className="rounded border px-4 py-2">
