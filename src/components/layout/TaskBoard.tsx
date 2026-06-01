@@ -15,7 +15,7 @@ const STATUSES = ["new", "active", "completed"] as const;
 
 const TableHeader = ({ title, count }: { title: string, count: number }) => (
   <div className="flex items-center justify-between border-b p-2">
-    <h2 className="text-sm font-semibold text-black/70">{title}</h2>
+    <h2 className="text-sm font-semibold capitalize text-black/70">{title}</h2>
     <h2 className="text-sm opacity-60">{count}</h2>
   </div>
 )

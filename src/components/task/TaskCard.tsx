@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { Notebook } from 'lucide-react';
 import React, { useState } from 'react'
-import type { RouterOutputs } from '~/utils/api'
+import { api, type RouterOutputs } from '~/utils/api'
 import CreateTaskDialog from './TaskDialog';
 
 type Task = RouterOutputs["task"]["getTasks"][number];
@@ -16,10 +16,25 @@ const priorityStyles = {
 
 const TaskCard = ({ task }: { task: Task }) => {
   const [open, setOpen] = useState(false);
+  const utils = api.useUtils();
   
   const priority = priorityStyles[task.priority as keyof typeof priorityStyles] ?? priorityStyles.low;
   const isOverdue = task.deadline && new Date(task.deadline) < new Date() && task.status !== "completed";
   const isToday = task.deadline && new Date(task.deadline).toDateString() === new Date().toDateString() && task.status !== "completed";
+
+  const updateTask = api.task.updateTaskStatus.useMutation({
+    onSuccess: async () => {
+      await utils.task.invalidate();
+    },
+    onError: (error) => {
+      console.error("Failed to update task:", error);
+    },
+  });
+
+  const handleSelectClick = (e: React.MouseEvent<HTMLSelectElement>) => {
+    e.stopPropagation();
+    updateTask.mutate({ id: task.id, status: e.currentTarget.value as "new" | "active" | "completed" });
+  };
 
   return (<>
     <div
@@ -43,18 +58,16 @@ const TaskCard = ({ task }: { task: Task }) => {
             <span className="text-gray-700 truncate">{(task.assignedTo as { username: string }).username}</span>
           ) : null}
         </div>
+        
+        <select onClick={handleSelectClick} className="w-full text-xs border border-gray-200 rounded-md p-1.5 bg-white">
+          <option value="new" selected={task.status === "new"}>New</option>
+          <option value="active" selected={task.status === "active"}>Active</option>
+          <option value="completed" selected={task.status === "completed"}>Completed</option>
+        </select>
 
         <div className="flex flex-wrap items-center justify-between text-xs">
           <span className={`${isOverdue ? "text-red-500 font-medium" : isToday ? "text-amber-500 font-medium" : "text-gray-400"}`}>
-            {task.deadline
-              ? task.status === "completed"
-                ? "Completed"
-                : isOverdue
-                  ? "⚠ Overdue"
-                  : isToday
-                    ? "⏰ Due today"
-                    : "Deadline"
-              : "\u00A0"}
+            {task.deadline ? task.status === "completed" ? "Completed" : isOverdue ? "⚠ Overdue" : isToday ? "⏰ Due today" : "Deadline" : "\u00A0"}
           </span>
           <span className={`font-medium ${task.status === "completed" ? "text-gray-400 line-through" : isOverdue ? "text-red-500" : isToday ? "text-amber-500" : "text-gray-600"}`}>
             {task.deadline?.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}

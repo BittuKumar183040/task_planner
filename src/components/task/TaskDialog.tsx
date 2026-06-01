@@ -62,13 +62,6 @@ const CreateTaskDialog = ({ task, open, onClose }: Props) => {
     },
   });
 
-  const getUserByUsername = api.user.getUserByUsername.useQuery(
-    { username: assignedTo.username },
-    {
-      enabled: false,
-    }
-  );
-
   const updateTask = api.task.updateTask.useMutation({
     onSuccess: async () => {
       await utils.task.invalidate();
