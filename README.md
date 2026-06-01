@@ -8,6 +8,9 @@ A modern team-based task management platform built with Next.js, TypeScript, Pri
 
 Task Planner is a collaborative project and task management application designed to help teams organize work, assign responsibilities, track progress, and monitor productivity through dashboards and analytics.
 
+<img width="1920" height="1080" alt="ezgif com-animated-gif-maker" src="https://github.com/user-attachments/assets/c8cc29ff-25c9-4864-a289-748ed46ec8b9" />
+
+
 The application supports:
 
 * User Authentication
@@ -65,7 +68,6 @@ Passwords are securely stored using bcrypt hashing.
 Users can authenticate using:
 
 * Email
-* Username
 * Password
 
 JWT-based sessions are used for maintaining authenticated user state.
@@ -157,15 +159,7 @@ Displays:
 
 ## High-Level Architecture
 
-Client (React + Next.js)
-↓
-tRPC API Layer
-↓
-Business Logic
-↓
-Prisma ORM
-↓
-PostgreSQL Database
+Client (React + Next.js) -> tRPC API Layer -> Business Logic -> Prisma ORM -> PostgreSQL Database
 
 ---
 
@@ -175,11 +169,11 @@ PostgreSQL Database
 src/
 │
 ├── pages/
-│   ├── signin.tsx
-│   ├── signup.tsx
-│   ├── dashboard.tsx
-│   ├── tasks.tsx
-│   └── settings.tsx
+│   ├── signin/
+│   ├── signup/
+│   ├── dashboard/
+│   ├── tasks/
+│   └── settings/
 │
 ├── components/
 │   ├── layout/
@@ -207,7 +201,7 @@ src/
 
 # Database Design
 
-
+<img width="557" height="617" alt="ezgif com-crop" src="https://github.com/user-attachments/assets/8625ecc2-a856-4b04-b2e2-dcb8056c3abd" />
 
 # API Architecture
 
@@ -227,9 +221,24 @@ taskRouter
 teamRouter
 dashboardRouter
 ```
-
----
-
+# User Flows
+```
+1. Register     → Create Team            → Dashboard           → User Board   → Team Board
+2. Login        → Dashboard              → User Board          → Team Board
+3. Dashboard    → Create Team            → Team Created        → Team Board
+4. Dashboard    → Switch Team            → Active Team Updated → Dashboard Reloaded
+5. Team Board   → Create Task            → Assign Member       → Set Priority → Set Deadline → Save Task
+6. Team Board   → Select Task            → Edit Task           → Save Changes → Board Updated
+7. Create Task  → Select Assignee        → Save Task           → Assignee Receives Task
+8. Team Board   → Open Task              → Change Status       → Save         → Dashboard Statistics Updated
+9. Settings     → Update Profile         → Save Changes        → Profile Updated
+10. Settings    → Update Avatar Seed     → Preview Avatar      → Save Avatar
+11. Settings    → Change Password        → Save Password       → Login With New Password
+12. Team Board  → View Members           → Fetch Team Members  → Display Member Statistics
+13. Dashboard   → Load Team Metrics      → Render Charts       → Display Analytics
+14. Any Page    → Sign Out               → Session Cleared     → Redirect To Sign In
+15. Unauth User → Access Protected Route → Middleware Check    → Redirect To Sign In
+```
 # Authentication Flow
 
 1. User submits credentials
@@ -241,17 +250,7 @@ dashboardRouter
 Flow:
 
 ```
-Login
-↓
-Credentials Provider
-↓
-Prisma User Lookup
-↓
-Bcrypt Validation
-↓
-JWT Token
-↓
-Session
+Login ->  Credentials Provider -> Prisma User Lookup -> Bcrypt Validation -> JWT Token -> Session
 ```
 
 # Security
@@ -308,11 +307,6 @@ Clone repository:
 
 ```bash
 git clone <repository-url>
-```
-
-Install dependencies:
-
-```bash
 npm install
 ```
 
