@@ -12,7 +12,7 @@ type Props = {
   data: {
     status: string;
     _count: number;
-  }[];
+  }[]
 };
 
 const COLORS = ["#9CA3AF", "#3B82F6", "#10B981"];

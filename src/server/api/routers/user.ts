@@ -83,9 +83,10 @@ export const userRouter = createTRPCRouter({
     .input(z.object({ name: z.string().optional(), email: z.string().email().optional(), password: z.string().optional(), image: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
+      const password = input.password ? await bcrypt.hash(input.password, 10) : undefined;
       const updatedUser = await ctx.db.user.update({
         where: { id: userId },
-        data: { ...input, updatedAt: new Date() },
+        data: { ...input, password, updatedAt: new Date() },
       });
       return updatedUser;
     }),
@@ -95,16 +96,6 @@ export const userRouter = createTRPCRouter({
       const userId = input.userId;
       await ctx.db.user.delete({ where: { id: userId } });
       return { message: "User deleted successfully" };
-    }),
-  forgotPassword: publicProcedure
-    .input(z.object({ email: z.string().email() }))
-    .mutation(async ({ ctx, input }) => {
-      const user = await ctx.db.user.findUnique({ where: { email: input.email } });
-      if (!user) {
-        throw new Error("User with this email does not exist");
-      }
-      // Here you would generate a password reset token and send an email to the user
-      return { message: "Password reset instructions sent to email" };
     }),
   updateImage: protectedProcedure
     .input(z.object({ image: z.string() }))

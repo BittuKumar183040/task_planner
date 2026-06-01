@@ -20,7 +20,7 @@ const Settings = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [image, setImage] = useState("");
-  const [password, setPassword] = useState("***********");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -113,11 +113,10 @@ const Settings = () => {
           <Input label="Name" onChange={setName} value={name} />
           <Input label="Email" onChange={setEmail} value={email} />
           <Input label="Password" type="password" value={password} onChange={setPassword} placeholder="Leave empty to keep current password" />
-          <div className=" h-5" />
+          <div className=" p-2">
+            <SubmitButton type="submit" label={updateUser.isPending ? "Saving..." : "Save Changes"} />
+          </div>
         </form>
-        <div className=" w-44 p-2">
-          <SubmitButton type="submit" label={updateUser.isPending ? "Saving..." : "Save Changes"} />
-        </div>
       </AppLayout>
       {isOpen === "createTeam" && <CreateTeam onClose={onClose} closeable={true} />}
       {isOpen === "joinTeam" && <JoinTeam onClose={onClose} closeable={true} />}

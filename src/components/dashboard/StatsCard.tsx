@@ -6,7 +6,7 @@ type Props = {
 const StatsCard = ({ title, value }: Props) => {
   return (
     <div className="rounded-lg border bg-white p-4 shadow-sm">
-      <p className="text-sm text-gray-500">
+      <p className="text-xs text-gray-500">
         {title}
       </p>
 
