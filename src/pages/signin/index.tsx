@@ -2,6 +2,7 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import BrandLogo from "~/components/ui/BrandLogo";
 import { SubmitButton } from "~/components/ui/Button";
 import Input from "~/components/ui/Input";
 
@@ -33,6 +34,8 @@ const SignInPage = () => {
         </div>
 
         <div className="flex-1 bg-white md:p-10 p-2 flex flex-col justify-center items-center">
+          <BrandLogo />
+          <div className="my-4" />
           <p className="text-[11px] font-medium tracking-widest text-gray-400 uppercase mb-4">Account access</p>
           <h1 className="text-2xl font-serif text-gray-900 mb-7">Sign in</h1>
 
@@ -43,6 +46,7 @@ const SignInPage = () => {
           )}
 
           <form onSubmit={handleSubmit} className="flex md:w-96 w-full flex-col items-start justify-start space-y-4 ">
+
             <Input label="Email" value={email} onChange={setEmail} placeholder="you@example.com" />
             <Input label="Password" type="password" value={password} onChange={setPassword} placeholder="*******" />
             <SubmitButton type="submit" label="Sign In →" className=" w-full" />

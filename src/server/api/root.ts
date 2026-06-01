@@ -3,11 +3,13 @@ import { userRouter } from "~/server/api/routers/user";
 import { taskRouter } from "./routers/task";
 import { teamRouter } from "./routers/team";
 import { teamMemberRouter } from "./routers/teamMembers";
+import { dashboardRouter } from "./routers/dashboard";
 
 export const appRouter = createTRPCRouter({
   user: userRouter,
   task: taskRouter,
   team: teamRouter,
+  dashboard: dashboardRouter,
   teamMember: teamMemberRouter
 });
 

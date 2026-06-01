@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React from 'react'
 import AppLayout from '~/components/layout/AppLayout';
+import DashboardOverview from '~/components/dashboard/DashboardOverview';
 
 const Board = () => {
 
   return <AppLayout>
-    Overview of the board page
+    <DashboardOverview />
   </AppLayout>;
 }
 

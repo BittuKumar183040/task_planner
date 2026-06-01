@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import type { LucideIcon } from "lucide-react";
-import { ChevronLeft, ChevronRight, Home, Table, Settings, LayoutDashboard, Users } from "lucide-react";
+import { Home, Table, Settings, LayoutDashboard, Users, ListIndentDecrease, ListIndentIncrease } from "lucide-react";
 
 type MenuItem = {
   label: string;
@@ -18,13 +18,20 @@ const menuItems: MenuItem[] = [
 ];
 
 const Sidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const storageCollapsed = typeof window !== "undefined" ? localStorage.getItem("sidebar_collapsed") === "true" : false;
+  const [ collapsed, setCollapsed ] = useState(storageCollapsed);
   const { pathname } = useRouter();
+
+  const toggleCollapsed = () => {
+    const newState = !collapsed;
+    setCollapsed(newState);
+    localStorage.setItem("sidebar_collapsed", newState.toString());
+  }
 
   return (
     <aside
-      style={{ width: collapsed ? "52px" : "176px" }}
-      className="flex h-full shrink-0 flex-col border-r bg-gray-100 text-xs transition-[width] duration-300 ease-in-out"
+      style={{ width: collapsed ? "52px" : "160px" }}
+      className="flex h-full shrink-0 flex-col overflow-hidden border-r bg-gray-100 text-xs transition-[width] duration-300 ease-in-out"
     >
       <nav className="flex-1 p-2">
         {menuItems.map((item) => {
@@ -35,7 +42,7 @@ const Sidebar = () => {
               href={item.href}
               className={`mb-1 flex items-center gap-3 rounded-md p-2 transition-colors
                 ${isActive
-                  ? "bg-gray-800 text-white"
+                  ? "bg-black/80 text-white"
                   : "hover:bg-gray-200 text-gray-700"
                 }`}
             >
@@ -49,21 +56,17 @@ const Sidebar = () => {
       <div className="border-t p-2">
         <Link
           href="/settings"
-          className={`mb-2 flex items-center gap-3 rounded-md p-2 transition-colors
-            ${pathname.startsWith("/settings")
-              ? "bg-gray-800 text-white"
-              : "hover:bg-slate-200 text-gray-700"
-            }`}
+          className={`mb-2 flex items-center gap-3 rounded-md p-2 transition-colors ${pathname.startsWith("/settings") ? "bg-black/80 text-white" : "hover:bg-gray-200 text-gray-700" }`}
         >
           <Settings size={18} className="shrink-0" />
           {!collapsed && <span>Settings</span>}
         </Link>
 
         <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="flex w-fit items-center gap-3 rounded-md p-2 transition-colors hover:bg-slate-200"
+          onClick={toggleCollapsed}
+          className="flex w-fit items-center gap-3 text-gray-700 rounded-md p-2 transition-colors hover:bg-gray-200"
         >
-          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          {collapsed ? <ListIndentIncrease size={18} /> : <ListIndentDecrease size={18} />}
         </button>
       </div>
     </aside>

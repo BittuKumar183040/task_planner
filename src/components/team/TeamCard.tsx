@@ -92,7 +92,7 @@ const TeamCard = ({ team, isActive, onSwitch }: TeamCardProps) => {
     <div
       ref={menuRef}
       onClick={() => setShowMenu(true)}
-      className={`relative bg-white hover:border-red-400 select-none border rounded-xl p-3.5 flex gap-2 cursor-pointer transition-colors
+      className={`relative bg-white hover:border-red-400 min-w-56 select-none border rounded-xl p-3.5 flex gap-2 cursor-pointer transition-colors
         ${isActive
           ? "border-gray-400 ring-2 ring-gray-100"
           : "border-gray-200 hover:border-gray-300"
@@ -117,7 +117,7 @@ const TeamCard = ({ team, isActive, onSwitch }: TeamCardProps) => {
         </p>
       </div>
       {showMenu &&
-        <div className=" absolute h-fit w-full bg-black/10 backdrop-blur-sm shadow-lg p-2 -top-2 left-0 -translate-y-full bg-white border rounded-xl flex flex-col gap-2 cursor-pointer transition-colors">
+        <div className=" absolute h-fit w-full bg-white/10 backdrop-blur-sm shadow-lg p-2 -top-2 left-0 -translate-y-full border rounded-xl flex flex-col gap-2 cursor-pointer transition-colors">
           {team.team.teamCode && <div className=" flex flex-col">
             <div className=" flex items-center gap-1.5 mb-1">
               <label className={`flex-1 block text-xs font-medium text-gray-500 mb-1.5 text-center`}>Team Code</label>

@@ -1,9 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 import { Users, ClipboardCheck, Pencil } from "lucide-react";
 import { type RouterOutputs } from "~/utils/api";
 
 type UserType = RouterOutputs["user"]["getUsersByTeam"];
-
-const getInitials = (name: string) => name?.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
 
 const UserTable = ({ users }: { users: UserType }) => {
   console.log(users)
@@ -33,7 +32,7 @@ const UserTable = ({ users }: { users: UserType }) => {
                   <td className="px-4 py-3 border-b border-gray-100">
                     <div className="flex items-center gap-2.5">
                       <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-violet-50 text-[11px] font-medium text-violet-600">
-                        {getInitials(user.name ?? user.username)}
+                        <img src={`https://api.dicebear.com/10.x/micah/svg?seed=${user.image}`} alt={''} />
                       </div>
                       <div>
                         <p className="text-[13px] font-medium text-gray-900">{user.name}</p>
@@ -71,7 +70,7 @@ const UserTable = ({ users }: { users: UserType }) => {
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-medium text-violet-600">
-                  {getInitials(user.name ?? user.username)}
+                  <img src={`https://api.dicebear.com/10.x/micah/svg?seed=${user.image}`} alt={''} />
                 </div>
                 <div>
                   <p className="text-[13px] font-medium text-gray-900">{user.name}</p>
