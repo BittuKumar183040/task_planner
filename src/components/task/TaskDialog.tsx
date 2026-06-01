@@ -7,8 +7,7 @@ import { getCurrentTeamId } from "~/helper/localstorageHelper";
 import Input, { SelectInput, Textarea } from "../ui/Input";
 import Tags from "../ui/Tags";
 import { TeamInputSearch } from "../team/TeamInputSearch";
-import { SubmitButton } from "../ui/Button";
-import { Loader2, Recycle, Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 
 type Props = {
   task?: RouterOutputs["task"]["getTasks"][number];
@@ -132,7 +131,7 @@ const CreateTaskDialog = ({ task, open, onClose }: Props) => {
         className={` disabled:cursor-not-allowed disabled:opacity-50
           flex items-center gap-2 rounded-md whitespace-nowrap bg-red-400 px-2 py-1 text-xs font-semibold text-white transition hover:bg-red-600 `}
       >
-        {deleteTask.isPending ?<Loader2 size={16} className=" animate-spin" /> : <Recycle size={16} /> }
+        {deleteTask.isPending ?<Loader2 size={16} className=" animate-spin" /> : <Trash2 size={16} /> }
         Delete
       </button>
     </div>
