@@ -7,6 +7,8 @@ import { getCurrentTeamId } from "~/helper/localstorageHelper";
 import Input, { SelectInput, Textarea } from "../ui/Input";
 import Tags from "../ui/Tags";
 import { TeamInputSearch } from "../team/TeamInputSearch";
+import { SubmitButton } from "../ui/Button";
+import { Loader2, Recycle, Trash2 } from "lucide-react";
 
 type Props = {
   task?: RouterOutputs["task"]["getTasks"][number];
@@ -62,6 +64,16 @@ const CreateTaskDialog = ({ task, open, onClose }: Props) => {
     },
   });
 
+  const deleteTask = api.task.deleteTask.useMutation({
+    onSuccess: async () => {
+      await utils.task.getTasks.invalidate();
+      onClose();
+    },
+    onError: (error) => {
+      console.error("Failed to delete task:", error);
+    }
+  });
+
   const updateTask = api.task.updateTask.useMutation({
     onSuccess: async () => {
       await utils.task.invalidate();
@@ -99,15 +111,31 @@ const CreateTaskDialog = ({ task, open, onClose }: Props) => {
     }
   };
 
+  const handleDeleteTask = async () => {
+    if (task) {
+      await deleteTask.mutateAsync({ taskId: task.id });
+    }
+  };
+
   if (!open) return null;
 
   return (
-    <Dialog title={task ?
-      <p>Edit Task
-        <span className="font-normal ml-2 bg-gray-100 px-2 py-1 rounded shadow-inner">
-          #{task.taskId}
-        </span>
-      </p>
+    <Dialog title={task ? <div className="flex items-center justify-between gap-4">
+      <p>Edit Task</p>
+      <div className=" tracking-widest px-2 py-1 text-xs bg-gray-100 rounded-md border">
+        #{task.taskId}
+      </div>
+      
+      <button
+        onClick={handleDeleteTask}
+        disabled={deleteTask.isPending}
+        className={` disabled:cursor-not-allowed disabled:opacity-50
+          flex items-center gap-2 rounded-md whitespace-nowrap bg-red-400 px-2 py-1 text-xs font-semibold text-white transition hover:bg-red-600 `}
+      >
+        {deleteTask.isPending ?<Loader2 size={16} className=" animate-spin" /> : <Recycle size={16} /> }
+        Delete
+      </button>
+    </div>
       : "Create Task"}
       onClose={onClose}
     >

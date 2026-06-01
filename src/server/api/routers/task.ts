@@ -138,14 +138,10 @@ export const taskRouter = createTRPCRouter({
   deleteTask: protectedProcedure
     .input(z.object({ taskId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id;
       const taskId = input.taskId;
       const task = await ctx.db.task.findUnique({ where: { id: taskId } });
       if (!task) {
         throw new Error("Task not found");
-      }
-      if (task.createdById !== userId && task.assignedToId !== userId) {
-        throw new Error("Unauthorized");
       }
       await ctx.db.task.delete({ where: { id: taskId } });
       return { message: "Task deleted successfully" };
