@@ -77,8 +77,6 @@ export const taskRouter = createTRPCRouter({
       const task = await ctx.db.task.findUnique({
         where: { id },
         include: {
-          assignedToId: false,
-          createdById: false,
           assignedTo: {
             select: { id: true, username: true, image: true },
           },
@@ -105,8 +103,6 @@ export const taskRouter = createTRPCRouter({
           assignedToId: userId,
         },
         include: {
-          assignedToId: false,
-          createdById: false,
           assignedTo: {
             select: { id: true, username: true, image: true },
           },
@@ -124,8 +120,6 @@ export const taskRouter = createTRPCRouter({
           teamId: input.teamId
         },
         include: {
-          assignedToId: false,
-          createdById: false,
           assignedTo: {
             select: { id: true, username: true, image: true },
           },

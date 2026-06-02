@@ -24,6 +24,15 @@ const DashboardOverview = () => {
     return null;
   }
 
+  const statusBreakdown = data.statusBreakdown.map(({ status, _count }) => ({
+    status: status ?? "Unknown",
+    _count,
+  }));
+  const priorityBreakdown = data.priorityBreakdown.map(({ priority, _count }) => ({
+    priority: priority ?? "Unknown",
+    _count,
+  }));
+  
   return (
     <div className="space-y-6 h-full overflow-hidden">
       <h1 className="text-xl font-semibold">Dashboard</h1>
@@ -36,8 +45,8 @@ const DashboardOverview = () => {
         </div>
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <TaskStatusChart data={data.statusBreakdown} />
-            <PriorityChart data={data.priorityBreakdown} />
+            <TaskStatusChart data={statusBreakdown} />
+            <PriorityChart data={priorityBreakdown} />
           </div>
         </div>
       </div>
