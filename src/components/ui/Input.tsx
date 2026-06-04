@@ -2,13 +2,14 @@ type InputProps = {
   label: string;
   value?: string;
   onChange: (value: string) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   placeholder?: string;
   type?: string;
   required?: boolean;
   className?: string
 };
 
-const Input = ({ label, value, onChange, placeholder, type = "text", required, className}: InputProps) => {
+const Input = ({ label, value, onChange, onKeyDown, placeholder, type = "text", required, className }: InputProps) => {
   return (
     <div className=" w-full">
       <label className={`block text-xs font-medium text-gray-500 mb-1.5 ${className}`}>{label}{required && <span className=" text-red-400">{" *"}</span>}</label>
@@ -17,6 +18,7 @@ const Input = ({ label, value, onChange, placeholder, type = "text", required, c
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        onKeyDown={onKeyDown}
         className="w-full h-10 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100"
         required={required}
       />
@@ -99,6 +101,50 @@ export const DialogConfirmButton = ({ label, pendingLabel, isPending, onClick, t
     >
       {isPending && pendingLabel ? pendingLabel : label}
     </button>
+  );
+};
+
+type Props = {
+  value: string;
+  loading: boolean;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
+};
+
+export const ChatInput = ({
+  value,
+  loading,
+  onChange,
+  onSubmit,
+}: Props) => {
+  return (
+    <div className="mt-4 flex gap-2">
+      <div className="flex-1">
+        <Input
+          label=""
+          value={value}
+          placeholder="Ask about tasks, projects, teams..."
+          onChange={onChange}
+          onKeyDown={(e) => {
+            if (
+              e.key === "Enter" &&
+              !loading
+            ) {
+              e.preventDefault();
+              onSubmit();
+            }
+          }}
+        />
+      </div>
+
+      <button
+        onClick={onSubmit}
+        disabled={loading || !value.trim()}
+        className="rounded-md bg-blue-600 px-5 py-2 text-white transition hover:bg-blue-700 disabled:opacity-50"
+      >
+        {loading ? "..." : "Send"}
+      </button>
+    </div>
   );
 };
 

@@ -1,9 +1,9 @@
 import { z } from "zod";
-
 import {
   createTRPCRouter,
   protectedProcedure,
 } from "~/server/api/trpc";
+import { createTaskService, deleteTaskService, getTaskByIdService, getTasksService, getTeamTasksService, updateTaskService, updateTaskStatusService } from "~/server/service/task.service";
 
 export const taskRouter = createTRPCRouter({
   createTask: protectedProcedure
@@ -20,14 +20,7 @@ export const taskRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id;
-      const newTask = await ctx.db.task.create({
-        data: {
-          ...input,
-          createdById: userId,
-        },
-      });
-      return newTask;
+      return createTaskService( ctx.db, ctx.session.user.id, input);
     }),
   updateTask: protectedProcedure
     .input(
@@ -43,15 +36,7 @@ export const taskRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id;
-      const updatedTask = await ctx.db.task.update({
-        where: { id: input.id },
-        data: {
-          ...input,
-          createdById: userId,
-        },
-      });
-      return updatedTask;
+      return updateTaskService(ctx.db, ctx.session.user.id, input.id, input);
     }),
   updateTaskStatus: protectedProcedure
     .input(
@@ -61,83 +46,30 @@ export const taskRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const updatedTask = await ctx.db.task.update({
-        where: { id: input.id },
-        data: {
-          status: input.status,
-        },
-      });
-      return updatedTask;
+      return updateTaskStatusService(ctx.db, input.id, input.status);
     }),
   getTaskById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id;
       const id = input.id;
-      const task = await ctx.db.task.findUnique({
-        where: { id },
-        include: {
-          assignedTo: {
-            select: { id: true, username: true, image: true },
-          },
-          createdBy: {
-            select: { id: true, username: true, image: true },
-          },
-        },
-      });
-      if (!task) {
-        throw new Error("Task not found");
-      }
-      if (task.createdById !== userId && task.assignedToId !== userId) {
-        throw new Error("Unauthorized");
-      }
+      const task = await getTaskByIdService(ctx.db, id);
       return task;
     }),
   getTasks: protectedProcedure
     .input(z.object({ teamId: z.string() }))
     .query(({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      return ctx.db.task.findMany({
-        where: {
-          teamId: input.teamId,
-          assignedToId: userId,
-        },
-        include: {
-          assignedTo: {
-            select: { id: true, username: true, image: true },
-          },
-          createdBy: {
-            select: { id: true, username: true, image: true },
-          },
-        },
-      });
+      return getTasksService(ctx.db, input.teamId, userId);
     }),
   getTeamTasks: protectedProcedure
     .input(z.object({ teamId: z.string() }))
     .query(({ ctx, input }) => {
-      return ctx.db.task.findMany({
-        where: {
-          teamId: input.teamId
-        },
-        include: {
-          assignedTo: {
-            select: { id: true, username: true, image: true },
-          },
-          createdBy: {
-            select: { id: true, username: true, image: true },
-          },
-        },
-      });
+      return getTeamTasksService(ctx.db, input.teamId);
     }),
   deleteTask: protectedProcedure
     .input(z.object({ taskId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const taskId = input.taskId;
-      const task = await ctx.db.task.findUnique({ where: { id: taskId } });
-      if (!task) {
-        throw new Error("Task not found");
-      }
-      await ctx.db.task.delete({ where: { id: taskId } });
+      await deleteTaskService(ctx.db, input.taskId);
       return { message: "Task deleted successfully" };
     })
 });

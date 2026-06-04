@@ -7,5 +7,6 @@ export const config = {
     "/teamboard/:path*",
     "/team-member/:path*",
     "/settings/:path*",
+    "/chat/:path*",
   ],
 };

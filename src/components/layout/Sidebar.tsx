@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import type { LucideIcon } from "lucide-react";
-import { Home, Table, Settings, LayoutDashboard, Users, ListIndentDecrease, ListIndentIncrease } from "lucide-react";
+import { Home, Table, Settings, LayoutDashboard, Users, ListIndentDecrease, ListIndentIncrease, MessageSquareMore } from "lucide-react";
 
 type MenuItem = {
   label: string;
@@ -53,6 +53,15 @@ const Sidebar = () => {
         })}
       </nav>
 
+      <div className="border-t px-2 py-1">
+        <Link
+          href="/chat"
+          className={`flex items-center gap-3 rounded-md p-2 transition-colors ${pathname.startsWith("/chat") ? "bg-black/80 text-white" : "hover:bg-gray-200 text-gray-700" }`}
+        >
+          <MessageSquareMore size={18} className="shrink-0" />
+          {!collapsed && <span>Chat</span>}
+        </Link>
+      </div>
       <div className="border-t p-2">
         <Link
           href="/settings"
