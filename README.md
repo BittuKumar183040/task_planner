@@ -1,4 +1,4 @@
-# Task Planner
+# AI Task Planner
 
 A modern team-based task management platform built with Next.js, TypeScript, Prisma, tRPC, and NextAuth.
 
@@ -6,7 +6,7 @@ A modern team-based task management platform built with Next.js, TypeScript, Pri
 
 ## Overview
 
-Task Planner is a collaborative project and task management application designed to help teams organize work, assign responsibilities, track progress, and monitor productivity through dashboards and analytics.
+Task Planner is a collaborative project and task management application designed to help teams organize work, assign responsibilities, track progress, and monitor productivity through dashboards and analytics. With the help of ai integration these action can be done vie chat option on the platform.1
 
 <img width="1920" height="1080" alt="ezgif com-animated-gif-maker" src="https://github.com/user-attachments/assets/c8cc29ff-25c9-4864-a289-748ed46ec8b9" />
 
@@ -38,6 +38,7 @@ The application supports:
 * tRPC
 * Prisma ORM
 * PostgreSQL (Supabase)
+* Google Gemini AI
 
 ## Authentication
 
@@ -183,6 +184,9 @@ src/
 │   └── ui/
 │
 ├── server/
+├── chat/
+│   ├── chat/
+│   │   ├── ai.ts
 │   ├── api/
 │   │   ├── routers/
 │   │   └── trpc.ts
@@ -214,7 +218,7 @@ Benefits:
 * Shared Types between Client and Server
 
 Routers:
-
+chatRoute
 ```
 userRouter
 taskRouter
@@ -222,6 +226,7 @@ teamRouter
 dashboardRouter
 ```
 # User Flows
+All the flows can be executed vie chat ai integration after authentication. like list the tasks, count number of tasks, and many more.
 ```
 1. Register     → Create Team            → Dashboard           → User Board   → Team Board
 2. Login        → Dashboard              → User Board          → Team Board
