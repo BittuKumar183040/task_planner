@@ -140,7 +140,7 @@ export const ChatInput = ({
       <button
         onClick={onSubmit}
         disabled={loading || !value.trim()}
-        className="rounded-md bg-blue-600 px-5 py-2 text-white transition hover:bg-blue-700 disabled:opacity-50"
+        className="rounded-md bg-gray-800 px-5 py-1 text-white transition hover:bg-gray-700 disabled:opacity-50"
       >
         {loading ? "..." : "Send"}
       </button>

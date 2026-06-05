@@ -12,7 +12,7 @@ const ChatMessage = ({
 }: Props) => {
   return (
     <div className={`flex ${ role === "user" ? "justify-end" : "justify-start" }`}>
-      <div className={`max-w-[80%] rounded-lg px-4 py-3 ${role === "user" ? "bg-blue-600 text-white" : "border bg-gray-50 text-gray-900" }`}>
+      <div className={`max-w-[80%] rounded-lg px-4 py-3 ${role === "user" ? "bg-gray-600 text-white" : "border bg-gray-50 text-gray-900" }`}>
         <div className="mb-1 text-xs font-semibold opacity-70">
           {role === "user" ? "You" : "Tasky AI"}
         </div>
